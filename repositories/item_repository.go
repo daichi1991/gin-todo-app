@@ -21,8 +21,17 @@ func NewItemRepository(db *gorm.DB) *ItemRepository {
 
 func (r *ItemRepository) GetAll(userID uint) (*[]models.Item, error) {
 	items := &[]models.Item{}
-	if err := r.db.Where("user_id = ?", userID).Find(items).Error; err != nil {
-		return nil, err
+	result := r.db.Where("user_id = ?", userID).Find(items)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 	return items, nil
+}
+
+func (r *ItemRepository) Create(newItem models.Item) (*models.Item, error) {
+	result := r.db.Create(&newItem)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &newItem, nil
 }
