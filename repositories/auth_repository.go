@@ -22,7 +22,7 @@ func NewAuthRepository(db *gorm.DB) IAuthRepository {
 	}
 }
 
-func (r *AuthRepository) CreateUser(user *models.User) error {
+func (r *AuthRepository) CreateUser(user models.User) error {
 	result := r.db.Create(user)
 	if result.Error != nil {
 		return result.Error
