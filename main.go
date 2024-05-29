@@ -1,6 +1,19 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"gin-todo-app/controllers"
+	"gin-todo-app/repositories"
+	"gin-todo-app/services"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+func setupRouter(db *gorm.DB) *gin.Engine {
+	itemRepository := repositories.NewItemRepository(db)
+	itemService := services.NewItemService(itemRepository)
+	itemController := controllers.NewItemController(itemService)
+}
 
 func main() {
 	r := gin.Default()
