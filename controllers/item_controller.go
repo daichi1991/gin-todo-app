@@ -18,11 +18,6 @@ type ItemController struct {
 	service services.IItemService
 }
 
-// FindAll implements IStatusController.
-func (c *ItemController) FindAll(ctx *gin.Context) {
-	panic("unimplemented")
-}
-
 func NewItemController(service services.IItemService) IItemController {
 	return &ItemController{
 		service: service,

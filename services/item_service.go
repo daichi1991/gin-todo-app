@@ -15,7 +15,7 @@ type ItemService struct {
 	repository repositories.IItemRepository
 }
 
-func NewItemService(repository repositories.IItemRepository) *ItemService {
+func NewItemService(repository repositories.IItemRepository) IItemService {
 	return &ItemService{
 		repository: repository,
 	}
@@ -25,7 +25,7 @@ func (s *ItemService) GetAll(userID uint) (*[]models.Item, error) {
 	return s.repository.GetAll(userID)
 }
 
-func (s *ItemService) Create(CreateItemInput models.Item, userID uint) (*models.Item, error) {
+func (s *ItemService) Create(CreateItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
 	newItem := models.Item{
 		Name:        CreateItemInput.Name,
 		Description: CreateItemInput.Description,

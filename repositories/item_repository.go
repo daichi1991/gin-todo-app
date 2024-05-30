@@ -16,7 +16,9 @@ type ItemRepository struct {
 }
 
 func NewItemRepository(db *gorm.DB) IItemRepository {
-	return &ItemRepository{db}
+	return &ItemRepository{
+		db: db,
+	}
 }
 
 func (r *ItemRepository) GetAll(userID uint) (*[]models.Item, error) {
