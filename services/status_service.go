@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"gin-todo-app/dto"
 	"gin-todo-app/models"
 	"gin-todo-app/repositories"
@@ -8,6 +9,7 @@ import (
 
 type IStatusService interface {
 	CreateStatus(CreateStatusInput dto.CreateStatusInput) (*models.Status, error)
+	CreateDefaultStatus(userID uint) (*models.Status, error)
 	FindAllStatus() (*[]models.Status, error)
 }
 
@@ -20,6 +22,16 @@ func (s *StatusService) CreateStatus(CreateStatusInput dto.CreateStatusInput) (*
 		Name: CreateStatusInput.Name,
 	}
 	return s.repository.CreateStatus(newStatus)
+}
+
+func (s *StatusService) CreateDefaultStatus(userID uint) (*models.Status, error) {
+	fmt.Println("CreateDefaultStatus")
+	defaultStatus := models.Status{
+		UserID: userID,
+		Name:   "todo",
+	}
+
+	return s.repository.CreateStatus(defaultStatus)
 }
 
 func (s *StatusService) FindAllStatus() (*[]models.Status, error) {

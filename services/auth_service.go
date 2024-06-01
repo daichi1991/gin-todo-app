@@ -18,12 +18,14 @@ type IAuthService interface {
 }
 
 type AuthService struct {
-	repository repositories.IAuthRepository
+	repository    repositories.IAuthRepository
+	statusService IStatusService
 }
 
-func NewAuthService(repository repositories.IAuthRepository) IAuthService {
+func NewAuthService(repository repositories.IAuthRepository, statusService IStatusService) IAuthService {
 	return &AuthService{
-		repository: repository,
+		repository:    repository,
+		statusService: statusService,
 	}
 }
 
@@ -37,7 +39,18 @@ func (s *AuthService) Signup(email string, password string) error {
 		Email:    email,
 		Password: string(hashedPassword),
 	}
-	return s.repository.CreateUser(user)
+
+	newUser, err := s.repository.CreateUser(user)
+	if err != nil {
+		return err
+	}
+
+	_, err = s.statusService.CreateDefaultStatus(newUser.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // ログイン

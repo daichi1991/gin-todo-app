@@ -8,7 +8,7 @@ import (
 )
 
 type IAuthRepository interface {
-	CreateUser(user models.User) error
+	CreateUser(user models.User) (*models.User, error)
 	FindUser(email string) (*models.User, error)
 }
 
@@ -22,12 +22,12 @@ func NewAuthRepository(db *gorm.DB) IAuthRepository {
 	}
 }
 
-func (r *AuthRepository) CreateUser(user models.User) error {
+func (r *AuthRepository) CreateUser(user models.User) (*models.User, error) {
 	result := r.db.Create(&user)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
-	return nil
+	return &user, nil
 }
 
 func (r *AuthRepository) FindUser(email string) (*models.User, error) {

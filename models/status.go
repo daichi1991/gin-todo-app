@@ -4,5 +4,7 @@ import "gorm.io/gorm"
 
 type Status struct {
 	gorm.Model
-	Name string `gorm:"not null"`
+	UserID uint   `gorm:"not null"`
+	User   User   `gorm:"foreignKey:UserID"`
+	Name   string `gorm:"not null,default:todo"`
 }

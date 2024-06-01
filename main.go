@@ -17,13 +17,13 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	itemService := services.NewItemService(itemRepository)
 	itemController := controllers.NewItemController(itemService)
 
-	authRepository := repositories.NewAuthRepository(db)
-	authService := services.NewAuthService(authRepository)
-	authController := controllers.NewAuthController(authService)
-
 	statusRepository := repositories.NewStatusRepository(db)
 	statusService := services.NewStatusRepository(statusRepository)
 	statusController := controllers.NewStatusController(statusService)
+
+	authRepository := repositories.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepository, statusService)
+	authController := controllers.NewAuthController(authService)
 
 	r := gin.Default()
 	r.Use(cors.Default())
