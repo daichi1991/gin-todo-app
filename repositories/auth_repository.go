@@ -23,7 +23,7 @@ func NewAuthRepository(db *gorm.DB) IAuthRepository {
 }
 
 func (r *AuthRepository) CreateUser(user models.User) error {
-	result := r.db.Create(user)
+	result := r.db.Create(&user)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -32,7 +32,7 @@ func (r *AuthRepository) CreateUser(user models.User) error {
 
 func (r *AuthRepository) FindUser(email string) (*models.User, error) {
 	var user models.User
-	result := r.db.Where(&user, "email = ?", email)
+	result := r.db.First(&user, "email = ?", email)
 	if result.Error != nil {
 		if result.Error.Error() == "record not found" {
 			return nil, errors.New("user not found")
