@@ -13,13 +13,13 @@ import (
 )
 
 func setupRouter(db *gorm.DB) *gin.Engine {
-	itemRepository := repositories.NewItemRepository(db)
-	itemService := services.NewItemService(itemRepository)
-	itemController := controllers.NewItemController(itemService)
-
 	statusRepository := repositories.NewStatusRepository(db)
 	statusService := services.NewStatusRepository(statusRepository)
 	statusController := controllers.NewStatusController(statusService)
+
+	itemRepository := repositories.NewItemRepository(db)
+	itemService := services.NewItemService(itemRepository, statusService)
+	itemController := controllers.NewItemController(itemService)
 
 	authRepository := repositories.NewAuthRepository(db)
 	authService := services.NewAuthService(authRepository, statusService)

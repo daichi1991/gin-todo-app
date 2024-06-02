@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"gin-todo-app/models"
 	"gin-todo-app/services"
 	"net/http"
 
@@ -25,7 +26,13 @@ func NewItemController(service services.IItemService) IItemController {
 }
 
 func (c *ItemController) GetAll(ctx *gin.Context) {
-	var userID uint = 1
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userID := user.(*models.User).ID
 	items, err := c.service.GetAll(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -35,7 +42,13 @@ func (c *ItemController) GetAll(ctx *gin.Context) {
 }
 
 func (c *ItemController) Create(ctx *gin.Context) {
-	var userID uint = 1
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userID := user.(*models.User).ID
 	var input dto.CreateItemInput
 	if err := ctx.ShouldBindJSON(&input); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

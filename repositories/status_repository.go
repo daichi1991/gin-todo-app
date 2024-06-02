@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"gin-todo-app/models"
 
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 type IStatusRepository interface {
 	CreateStatus(newStatus models.Status) (*models.Status, error)
 	FindAllStatus() (*[]models.Status, error)
+	FindStatus(name string, userID uint) (*models.Status, error)
 }
 
 type StatusRepository struct {
@@ -32,6 +34,16 @@ func (r *StatusRepository) FindAllStatus() (*[]models.Status, error) {
 		return nil, result.Error
 	}
 	return &statuses, nil
+}
+
+func (r *StatusRepository) FindStatus(name string, userID uint) (*models.Status, error) {
+	status := models.Status{}
+	fmt.Println("FindStatus")
+	result := r.db.Where("name = ? AND user_id = ?", name, userID).First(&status)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &status, nil
 }
 
 func NewStatusRepository(db *gorm.DB) IStatusRepository {

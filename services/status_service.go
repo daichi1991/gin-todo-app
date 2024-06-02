@@ -11,6 +11,7 @@ type IStatusService interface {
 	CreateStatus(CreateStatusInput dto.CreateStatusInput) (*models.Status, error)
 	CreateDefaultStatus(userID uint) (*models.Status, error)
 	FindAllStatus() (*[]models.Status, error)
+	FindDefaultStatus(userID uint) (*models.Status, error)
 }
 
 type StatusService struct {
@@ -25,7 +26,6 @@ func (s *StatusService) CreateStatus(CreateStatusInput dto.CreateStatusInput) (*
 }
 
 func (s *StatusService) CreateDefaultStatus(userID uint) (*models.Status, error) {
-	fmt.Println("CreateDefaultStatus")
 	defaultStatus := models.Status{
 		UserID: userID,
 		Name:   "todo",
@@ -36,6 +36,15 @@ func (s *StatusService) CreateDefaultStatus(userID uint) (*models.Status, error)
 
 func (s *StatusService) FindAllStatus() (*[]models.Status, error) {
 	return s.repository.FindAllStatus()
+}
+
+func (s *StatusService) FindDefaultStatus(userID uint) (*models.Status, error) {
+	fmt.Println("FindDefaultStatus")
+	defaultStatus, err := s.repository.FindStatus("todo", userID)
+	if err != nil {
+		return nil, err
+	}
+	return defaultStatus, nil
 }
 
 func NewStatusRepository(repository repositories.IStatusRepository) IStatusService {
