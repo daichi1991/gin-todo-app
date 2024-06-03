@@ -30,6 +30,7 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	itemRouter := r.Group("/items")
 	itemRouterWithAuth := r.Group("/items", middlewares.AuthMiddleware(authService))
 	authRouter := r.Group("/auth")
+	authRouterWithAuth := r.Group("/auth", middlewares.AuthMiddleware(authService))
 	statusRouter := r.Group("/statuses")
 	statusRouterWithAuth := r.Group("/statuses", middlewares.AuthMiddleware(authService))
 
@@ -38,6 +39,7 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 
 	authRouter.POST("/signup", authController.Signup)
 	authRouter.POST("/login", authController.Login)
+	authRouterWithAuth.PUT("/update", authController.xxx)
 
 	statusRouter.GET("", statusController.FindAll)
 	statusRouterWithAuth.POST("", statusController.Create)
