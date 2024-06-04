@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"gin-todo-app/dto"
+	"gin-todo-app/models"
 	"gin-todo-app/services"
 	"net/http"
 
@@ -11,6 +13,7 @@ import (
 type IAuthController interface {
 	Signup(ctx *gin.Context)
 	Login(ctx *gin.Context)
+	Update(ctx *gin.Context)
 }
 
 type AuthController struct {
@@ -50,6 +53,28 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	ctx.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func (c *AuthController) Update(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	userID := user.(*models.User).ID
+
+	var input dto.UpdateInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(input)
+	result, err := c.service.UpdateUser(input, userID)
+	if err != nil {
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": result})
 }
 
 func NewAuthController(service services.IAuthService) IAuthController {

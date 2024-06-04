@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"gin-todo-app/dto"
 	"gin-todo-app/models"
 	"gin-todo-app/repositories"
 	"os"
@@ -15,7 +16,7 @@ type IAuthService interface {
 	Signup(email string, password string) error
 	Login(email string, password string) (*string, error)
 	GetUserFromToken(tokenString string) (*models.User, error)
-	UpdateUser(user models.User) (*models.User, error)
+	UpdateUser(user dto.UpdateInput, userID uint) (*models.User, error)
 }
 
 type AuthService struct {
@@ -110,11 +111,12 @@ func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error)
 	return user, nil
 }
 
-func (s *AuthService) UpdateUser(user models.User) (*models.User, error) {
-	targetUser, err := s.repository.FindUserByID(user.ID)
+func (s *AuthService) UpdateUser(updateUserInput dto.UpdateInput, userID uint) (*models.User, error) {
+	targetUser, err := s.repository.FindUserByID(userID)
 	if err != nil {
 		return nil, err
 	}
+	targetUser.Username = &updateUserInput.Username
 	result, err := s.repository.UpdateUser(*targetUser)
 	if err != nil {
 		return nil, err

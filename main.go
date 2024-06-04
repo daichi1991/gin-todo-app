@@ -39,7 +39,7 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 
 	authRouter.POST("/signup", authController.Signup)
 	authRouter.POST("/login", authController.Login)
-	authRouterWithAuth.PUT("/update", authController.xxx)
+	authRouterWithAuth.PUT("/update", authController.Update)
 
 	statusRouter.GET("", statusController.FindAll)
 	statusRouterWithAuth.POST("", statusController.Create)

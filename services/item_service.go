@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"gin-todo-app/dto"
 	"gin-todo-app/models"
 	"gin-todo-app/repositories"
@@ -29,7 +28,6 @@ func (s *ItemService) GetAll(userID uint) (*[]models.Item, error) {
 }
 
 func (s *ItemService) Create(CreateItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
-	fmt.Println(userID)
 	defaultStatus, err := s.statusService.FindDefaultStatus(userID)
 	if err != nil {
 		return nil, err
