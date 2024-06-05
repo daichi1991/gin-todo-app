@@ -70,11 +70,11 @@ func (c *AuthController) Update(ctx *gin.Context) {
 		return
 	}
 	fmt.Println(input)
-	result, err := c.service.UpdateUser(input, userID)
+	err := c.service.UpdateUser(input, userID)
 	if err != nil {
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"data": result})
+	ctx.Status(http.StatusOK)
 }
 
 func NewAuthController(service services.IAuthService) IAuthController {

@@ -7,8 +7,9 @@ import (
 )
 
 type IItemService interface {
-	GetAll(userID uint) (*[]models.Item, error)
-	Create(CreateItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
+	FindAll(userID uint) (*[]models.Item, error)
+	Create(createItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
+	Update(updateItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
 }
 
 type ItemService struct {
@@ -23,21 +24,25 @@ func NewItemService(repository repositories.IItemRepository, statusService IStat
 	}
 }
 
-func (s *ItemService) GetAll(userID uint) (*[]models.Item, error) {
-	return s.repository.GetAll(userID)
+func (s *ItemService) FindAll(userID uint) (*[]models.Item, error) {
+	return s.repository.FindAll(userID)
 }
 
-func (s *ItemService) Create(CreateItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
+func (s *ItemService) Create(createItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
 	defaultStatus, err := s.statusService.FindDefaultStatus(userID)
 	if err != nil {
 		return nil, err
 	}
 
 	newItem := models.Item{
-		Name:        CreateItemInput.Name,
-		Description: CreateItemInput.Description,
+		Name:        createItemInput.Name,
+		Description: createItemInput.Description,
 		UserID:      userID,
 		StatusID:    defaultStatus.ID,
 	}
 	return s.repository.Create(newItem)
+}
+
+func (s *ItemService) Update(updateItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
+	panic("make it")
 }

@@ -16,7 +16,7 @@ type IAuthService interface {
 	Signup(email string, password string) error
 	Login(email string, password string) (*string, error)
 	GetUserFromToken(tokenString string) (*models.User, error)
-	UpdateUser(user dto.UpdateInput, userID uint) (*models.User, error)
+	UpdateUser(user dto.UpdateInput, userID uint) error
 }
 
 type AuthService struct {
@@ -111,15 +111,15 @@ func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error)
 	return user, nil
 }
 
-func (s *AuthService) UpdateUser(updateUserInput dto.UpdateInput, userID uint) (*models.User, error) {
+func (s *AuthService) UpdateUser(updateUserInput dto.UpdateInput, userID uint) error {
 	targetUser, err := s.repository.FindUserByID(userID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	targetUser.Username = &updateUserInput.Username
-	result, err := s.repository.UpdateUser(*targetUser)
+	_, err = s.repository.UpdateUser(*targetUser)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result, nil
+	return nil
 }
