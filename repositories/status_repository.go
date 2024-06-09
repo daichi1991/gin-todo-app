@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"gin-todo-app/models"
 
 	"gorm.io/gorm"
@@ -10,7 +9,9 @@ import (
 type IStatusRepository interface {
 	CreateStatus(newStatus models.Status) (*models.Status, error)
 	FindAllStatus() (*[]models.Status, error)
-	FindStatus(name string, userID uint) (*models.Status, error)
+	FindDefaultStatus(userID uint) (*models.Status, error)
+	FindStatusByID(statusID uint) (*models.Status, error)
+	UpdateStatus(updateStatus models.Status) (*models.Status, error)
 }
 
 type StatusRepository struct {
@@ -36,14 +37,31 @@ func (r *StatusRepository) FindAllStatus() (*[]models.Status, error) {
 	return &statuses, nil
 }
 
-func (r *StatusRepository) FindStatus(name string, userID uint) (*models.Status, error) {
+func (r *StatusRepository) FindDefaultStatus(userID uint) (*models.Status, error) {
 	status := models.Status{}
-	fmt.Println("FindStatus")
-	result := r.db.Where("name = ? AND user_id = ?", name, userID).First(&status)
+	result := r.db.Where("user_id = ? and default = ?", userID, true).First(&status)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &status, nil
+}
+
+func (r *StatusRepository) FindStatusByID(statusID uint) (*models.Status, error) {
+	status := models.Status{}
+	result := r.db.Where("id = ?", statusID).First(&status)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &status, nil
+}
+
+func (r *StatusRepository) UpdateStatus(updateStatus models.Status) (*models.Status, error) {
+	result := r.db.Save(&updateStatus)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &updateStatus, nil
 }
 
 func NewStatusRepository(db *gorm.DB) IStatusRepository {

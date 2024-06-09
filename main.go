@@ -44,6 +44,7 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 
 	statusRouter.GET("", statusController.FindAll)
 	statusRouterWithAuth.POST("", statusController.Create)
+	statusRouterWithAuth.PUT(":id", statusController.Update)
 
 	return r
 }
