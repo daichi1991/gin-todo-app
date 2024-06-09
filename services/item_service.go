@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"gin-todo-app/dto"
 	"gin-todo-app/models"
 	"gin-todo-app/repositories"
@@ -9,7 +10,7 @@ import (
 type IItemService interface {
 	FindAll(userID uint) (*[]models.Item, error)
 	Create(createItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
-	Update(updateItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
+	Update(updateItemInput dto.UpdateItemInput, itemID uint, userID uint) (*models.Item, error)
 }
 
 type ItemService struct {
@@ -43,6 +44,19 @@ func (s *ItemService) Create(createItemInput dto.CreateItemInput, userID uint) (
 	return s.repository.Create(newItem)
 }
 
-func (s *ItemService) Update(updateItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
-	panic("make it")
+func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, itemID uint, userID uint) (*models.Item, error) {
+	targetItem, err := s.repository.FindByID(itemID)
+	if err != nil {
+		return nil, err
+	}
+	if targetItem.UserID != userID {
+		return nil, errors.New("not parmitted")
+	}
+	targetItem.Name = updateItemInput.Name
+	targetItem.Description = updateItemInput.Description
+	_, err = s.repository.Update(*targetItem)
+	if err != nil {
+		return nil, err
+	}
+	return targetItem, nil
 }

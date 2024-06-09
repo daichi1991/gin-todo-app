@@ -9,7 +9,7 @@ import (
 
 type IItemRepository interface {
 	FindAll(userID uint) (*[]models.Item, error)
-	FindByID(itemID uint, userID uint) (*models.Item, error)
+	FindByID(itemID uint) (*models.Item, error)
 	Create(newItem models.Item) (*models.Item, error)
 	Update(updatedItem models.Item) (*models.Item, error)
 }
@@ -33,9 +33,9 @@ func (r *ItemRepository) FindAll(userID uint) (*[]models.Item, error) {
 	return items, nil
 }
 
-func (r *ItemRepository) FindByID(itemID uint, userID uint) (*models.Item, error) {
+func (r *ItemRepository) FindByID(itemID uint) (*models.Item, error) {
 	var item models.Item
-	result := r.db.First(&item, "id = ? AND user_id = ?", itemID, userID)
+	result := r.db.First(&item, "id = ?", itemID)
 	if result.Error != nil {
 		if result.Error.Error() == "record not found" {
 			return nil, errors.New("item not found")

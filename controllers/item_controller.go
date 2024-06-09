@@ -4,6 +4,7 @@ import (
 	"gin-todo-app/models"
 	"gin-todo-app/services"
 	"net/http"
+	"strconv"
 
 	"gin-todo-app/dto"
 
@@ -11,8 +12,9 @@ import (
 )
 
 type IItemController interface {
-	GetAll(c *gin.Context)
+	FindAll(c *gin.Context)
 	Create(c *gin.Context)
+	Update(c *gin.Context)
 }
 
 type ItemController struct {
@@ -25,7 +27,7 @@ func NewItemController(service services.IItemService) IItemController {
 	}
 }
 
-func (c *ItemController) GetAll(ctx *gin.Context) {
+func (c *ItemController) FindAll(ctx *gin.Context) {
 	user, exists := ctx.Get("user")
 	if !exists {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -33,7 +35,7 @@ func (c *ItemController) GetAll(ctx *gin.Context) {
 	}
 
 	userID := user.(*models.User).ID
-	items, err := c.service.GetAll(userID)
+	items, err := c.service.FindAll(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -55,6 +57,31 @@ func (c *ItemController) Create(ctx *gin.Context) {
 		return
 	}
 	item, err := c.service.Create(input, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": item})
+}
+
+func (c *ItemController) Update(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	userID := user.(*models.User).ID
+	var input dto.UpdateItemInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	itemID, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	item, err := c.service.Update(input, uint(itemID), userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

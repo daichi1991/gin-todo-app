@@ -34,8 +34,9 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	statusRouter := r.Group("/statuses")
 	statusRouterWithAuth := r.Group("/statuses", middlewares.AuthMiddleware(authService))
 
-	itemRouter.GET("", itemController.GetAll)
+	itemRouter.GET("", itemController.FindAll)
 	itemRouterWithAuth.POST("", itemController.Create)
+	itemRouterWithAuth.PUT(":id", itemController.Update)
 
 	authRouter.POST("/signup", authController.Signup)
 	authRouter.POST("/login", authController.Login)
