@@ -43,7 +43,13 @@ func (c *StatusController) Create(ctx *gin.Context) {
 
 // FindAll implements IStatusController.
 func (c *StatusController) FindAll(ctx *gin.Context) {
-	statuses, err := c.service.FindAllStatus()
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	userID := user.(*models.User).ID
+	statuses, err := c.service.FindAllStatus(userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Unexpected error"})
 	}

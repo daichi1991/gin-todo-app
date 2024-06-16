@@ -8,7 +8,7 @@ import (
 
 type IStatusRepository interface {
 	CreateStatus(newStatus models.Status) (*models.Status, error)
-	FindAllStatus() (*[]models.Status, error)
+	FindAllStatus(userID uint) (*[]models.Status, error)
 	FindDefaultStatus(userID uint) (*models.Status, error)
 	FindStatusByID(statusID uint) (*models.Status, error)
 	UpdateStatus(updateStatus models.Status) (*models.Status, error)
@@ -28,9 +28,9 @@ func (r *StatusRepository) CreateStatus(newStatus models.Status) (*models.Status
 }
 
 // FindAllStatus implements IStatusRepository.
-func (r *StatusRepository) FindAllStatus() (*[]models.Status, error) {
+func (r *StatusRepository) FindAllStatus(userID uint) (*[]models.Status, error) {
 	var statuses []models.Status
-	result := r.db.Find(&statuses)
+	result := r.db.Where("user_id = ?", userID).Find(&statuses)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -39,7 +39,7 @@ func (r *StatusRepository) FindAllStatus() (*[]models.Status, error) {
 
 func (r *StatusRepository) FindDefaultStatus(userID uint) (*models.Status, error) {
 	status := models.Status{}
-	result := r.db.Where("user_id = ? and default = ?", userID, true).First(&status)
+	result := r.db.Where("user_id = ? and default_status = true", userID).First(&status)
 	if result.Error != nil {
 		return nil, result.Error
 	}

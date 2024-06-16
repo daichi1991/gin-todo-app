@@ -9,6 +9,7 @@ import (
 
 type IItemService interface {
 	FindAll(userID uint) (*[]models.Item, error)
+	FindByID(itemID uint, userID uint) (*models.Item, error)
 	Create(createItemInput dto.CreateItemInput, userID uint) (*models.Item, error)
 	Update(updateItemInput dto.UpdateItemInput, itemID uint, userID uint) (*models.Item, error)
 }
@@ -29,6 +30,10 @@ func (s *ItemService) FindAll(userID uint) (*[]models.Item, error) {
 	return s.repository.FindAll(userID)
 }
 
+func (s *ItemService) FindByID(itemID uint, userID uint) (*models.Item, error) {
+	return s.repository.FindByID(itemID, userID)
+}
+
 func (s *ItemService) Create(createItemInput dto.CreateItemInput, userID uint) (*models.Item, error) {
 	defaultStatus, err := s.statusService.FindDefaultStatus(userID)
 	if err != nil {
@@ -45,7 +50,7 @@ func (s *ItemService) Create(createItemInput dto.CreateItemInput, userID uint) (
 }
 
 func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, itemID uint, userID uint) (*models.Item, error) {
-	targetItem, err := s.repository.FindByID(itemID)
+	targetItem, err := s.repository.FindByID(itemID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +59,7 @@ func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, itemID uint, u
 	}
 	targetItem.Name = updateItemInput.Name
 	targetItem.Description = updateItemInput.Description
+	targetItem.StatusID = updateItemInput.StatusID
 	_, err = s.repository.Update(*targetItem)
 	if err != nil {
 		return nil, err

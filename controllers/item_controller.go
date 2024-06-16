@@ -13,6 +13,7 @@ import (
 
 type IItemController interface {
 	FindAll(c *gin.Context)
+	FindByID(c *gin.Context)
 	Create(c *gin.Context)
 	Update(c *gin.Context)
 }
@@ -41,6 +42,29 @@ func (c *ItemController) FindAll(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"data": items})
+}
+
+func (c *ItemController) FindByID(ctx *gin.Context) {
+	user, exists := ctx.Get("user")
+	if !exists {
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	itemID, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID := user.(*models.User).ID
+
+	item, err := c.service.FindByID(uint(itemID), userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"data": item})
 }
 
 func (c *ItemController) Create(ctx *gin.Context) {
