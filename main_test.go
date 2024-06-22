@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"gin-todo-app/infra"
 	"gin-todo-app/models"
 	"gin-todo-app/services"
@@ -28,12 +29,6 @@ func TestMain(m *testing.M) {
 }
 
 func setupTestData(db *gorm.DB) {
-	items := []models.Item{
-		{Name: "テストタスク1", Description: "", UserID: 1, StatusID: 1},
-		{Name: "テストタスク2", Description: "テスト2", UserID: 1, StatusID: 2},
-		{Name: "テストタスク3", Description: "テスト3", UserID: 2, StatusID: 2},
-	}
-
 	users := []models.User{
 		{Email: "test1@example.com", Password: "test1pass"},
 		{Email: "test2@example.com", Password: "test2pass"},
@@ -45,19 +40,34 @@ func setupTestData(db *gorm.DB) {
 		{Name: "pending", UserID: 2, DefaultStatus: false},
 	}
 
+	items := []models.Item{
+		{Name: "テストタスク1", Description: "", UserID: 1, StatusID: 1},
+		{Name: "テストタスク2", Description: "テスト2", UserID: 1, StatusID: 2},
+		{Name: "テストタスク3", Description: "テスト3", UserID: 2, StatusID: 2},
+	}
+
 	for _, user := range users {
-		db.Create(&user)
+		tx := db.Create(&user)
+		if tx.Error != nil {
+			fmt.Println(tx.Error)
+		}
 	}
 	for _, status := range statuses {
-		db.Create(&status)
+		tx := db.Create(&status)
+		if tx.Error != nil {
+			fmt.Println(tx.Error)
+		}
 	}
 	for _, item := range items {
-		db.Create(&item)
+		tx := db.Create(&item)
+		if tx.Error != nil {
+			fmt.Println(tx.Error)
+		}
 	}
 }
 
 func setup() *gin.Engine {
-	db := infra.SetupDB()
+	db := infra.TestDB()
 	db.AutoMigrate(&models.Item{}, &models.User{}, &models.Status{})
 
 	setupTestData(db)
@@ -69,12 +79,13 @@ func setup() *gin.Engine {
 func TestFindByID(t *testing.T) {
 	router := setup()
 
-	token, err := services.CreateToken(1, "test1@example.com")
-	assert.Equal(t, nil, err)
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/items/1", nil)
-	req.Header.Set("Authorization", "Bearer "+*token)
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+	bearerToken := "Bearer " + *token
+	req.Header.Set("Authorization", bearerToken)
 
 	router.ServeHTTP(w, req)
 
