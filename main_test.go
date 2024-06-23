@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gin-todo-app/infra"
 	"gin-todo-app/models"
+	"gin-todo-app/repositories"
 	"gin-todo-app/services"
 	"log"
 	"net/http"
@@ -29,13 +30,18 @@ func TestMain(m *testing.M) {
 }
 
 func setupTestData(db *gorm.DB) {
+	statusRepository := repositories.NewStatusRepository(db)
+	statusService := services.NewStatusRepository(statusRepository)
+
+	authRepository := repositories.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepository, statusService)
+
 	users := []models.User{
 		{Email: "test1@example.com", Password: "test1pass"},
 		{Email: "test2@example.com", Password: "test2pass"},
 	}
 
 	statuses := []models.Status{
-		{Name: "todo", UserID: 1, DefaultStatus: true},
 		{Name: "doing", UserID: 1, DefaultStatus: false},
 		{Name: "pending", UserID: 2, DefaultStatus: false},
 	}
@@ -47,9 +53,9 @@ func setupTestData(db *gorm.DB) {
 	}
 
 	for _, user := range users {
-		tx := db.Create(&user)
-		if tx.Error != nil {
-			fmt.Println(tx.Error)
+		err := authService.Signup(user.Email, user.Password)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 	for _, status := range statuses {
@@ -89,9 +95,35 @@ func TestFindByID(t *testing.T) {
 
 	router.ServeHTTP(w, req)
 
-	var res map[string][]models.Item
-	json.Unmarshal(w.Body.Bytes(), &res)
-
+	var res models.Item
+	var response struct {
+		Data models.Item `json:"data"`
+	}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	res = response.Data
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, 1, len(res["data"]))
+	assert.Equal(t, "テストタスク1", res.Name)
+}
+
+func TestFindAll(t *testing.T) {
+	router := setup()
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/items", nil)
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+	bearerToken := "Bearer " + *token
+	req.Header.Set("Authorization", bearerToken)
+
+	router.ServeHTTP(w, req)
+
+	var res []models.Item
+	var response struct {
+		Data []models.Item `json:"data"`
+	}
+	json.Unmarshal(w.Body.Bytes(), &response)
+	res = response.Data
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, 2, len(res))
 }
